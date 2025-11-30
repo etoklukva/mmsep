@@ -1,0 +1,179 @@
+@prefix : <http://example.org/ontology/task3/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix swrla: <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#> .
+@base <http://example.org/ontology/task3/> .
+
+<http://example.org/ontology/task3> rdf:type owl:Ontology .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled
+swrla:isRuleEnabled rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://example.org/ontology/task3/автор_запроса
+:автор_запроса rdf:type owl:ObjectProperty ;
+               rdfs:domain :Запрос ;
+               rdfs:range :Пользователь .
+
+
+###  http://example.org/ontology/task3/обучается_по
+:обучается_по rdf:type owl:ObjectProperty ;
+              rdfs:domain :Пользователь ;
+              rdfs:range :УчебнаяПрограмма .
+
+
+###  http://example.org/ontology/task3/содержит
+:содержит rdf:type owl:ObjectProperty ,
+                   owl:TransitiveProperty ;
+          rdfs:domain :УчебнаяПрограмма ;
+          rdfs:range :УчебныйМодуль .
+
+
+###  http://example.org/ontology/task3/ссылается_на
+:ссылается_на rdf:type owl:ObjectProperty ;
+              rdfs:domain :Запрос ;
+              rdfs:range :УчебныйМатериал .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://example.org/ontology/task3/Запрос
+:Запрос rdf:type owl:Class .
+
+
+###  http://example.org/ontology/task3/КорректныйЗапрос
+:КорректныйЗапрос rdf:type owl:Class .
+
+
+###  http://example.org/ontology/task3/Пользователь
+:Пользователь rdf:type owl:Class .
+
+
+###  http://example.org/ontology/task3/УчебнаяПрограмма
+:УчебнаяПрограмма rdf:type owl:Class .
+
+
+###  http://example.org/ontology/task3/УчебныйМатериал
+:УчебныйМатериал rdf:type owl:Class .
+
+
+###  http://example.org/ontology/task3/УчебныйМодуль
+:УчебныйМодуль rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://example.org/ontology/task3/Базовый_курс_Python
+:Базовый_курс_Python rdf:type owl:NamedIndividual ,
+                              :УчебныйМатериал .
+
+
+###  http://example.org/ontology/task3/Джон_Прайс
+:Джон_Прайс rdf:type owl:NamedIndividual ,
+                     :Пользователь ;
+            :обучается_по :Информационные_технологии .
+
+
+###  http://example.org/ontology/task3/Информационные_технологии
+:Информационные_технологии rdf:type owl:NamedIndividual ,
+                                    :УчебнаяПрограмма ;
+                           :содержит :Основы_программирования .
+
+
+###  http://example.org/ontology/task3/Основы_программирования
+:Основы_программирования rdf:type owl:NamedIndividual ,
+                                  :УчебныйМодуль ;
+                         :содержит :Базовый_курс_Python .
+
+
+###  http://example.org/ontology/task3/запрос_123
+:запрос_123 rdf:type owl:NamedIndividual ,
+                     :Запрос ;
+            :автор_запроса :Джон_Прайс ;
+            :ссылается_на :Базовый_курс_Python .
+
+
+[ swrla:isRuleEnabled "true"^^xsd:boolean
+] .
+
+#################################################################
+#    Rules
+#################################################################
+
+:Q rdf:type swrl:Variable .
+
+:S rdf:type swrl:Variable .
+
+:P rdf:type swrl:Variable .
+
+:R rdf:type swrl:Variable .
+
+[ rdfs:label "Rule: classify valid query" ;
+   rdf:type swrl:Imp ;
+   swrl:body [ rdf:type swrl:AtomList ;
+               rdf:first [ rdf:type swrl:ClassAtom ;
+                           swrl:classPredicate :Запрос ;
+                           swrl:argument1 :Q
+                         ] ;
+               rdf:rest [ rdf:type swrl:AtomList ;
+                          rdf:first [ rdf:type swrl:IndividualPropertyAtom ;
+                                      swrl:propertyPredicate :автор_запроса ;
+                                      swrl:argument1 :Q ;
+                                      swrl:argument2 :S
+                                    ] ;
+                          rdf:rest [ rdf:type swrl:AtomList ;
+                                     rdf:first [ rdf:type swrl:IndividualPropertyAtom ;
+                                                 swrl:propertyPredicate :обучается_по ;
+                                                 swrl:argument1 :S ;
+                                                 swrl:argument2 :P
+                                               ] ;
+                                     rdf:rest [ rdf:type swrl:AtomList ;
+                                                rdf:first [ rdf:type swrl:IndividualPropertyAtom ;
+                                                            swrl:propertyPredicate :содержит ;
+                                                            swrl:argument1 :P ;
+                                                            swrl:argument2 :R
+                                                          ] ;
+                                                rdf:rest [ rdf:type swrl:AtomList ;
+                                                           rdf:first [ rdf:type swrl:IndividualPropertyAtom ;
+                                                                       swrl:propertyPredicate :ссылается_на ;
+                                                                       swrl:argument1 :Q ;
+                                                                       swrl:argument2 :R
+                                                                     ] ;
+                                                           rdf:rest [ rdf:type swrl:AtomList ;
+                                                                      rdf:first [ rdf:type swrl:ClassAtom ;
+                                                                                  swrl:classPredicate :УчебныйМатериал ;
+                                                                                  swrl:argument1 :R
+                                                                                ] ;
+                                                                      rdf:rest rdf:nil
+                                                                    ]
+                                                         ]
+                                              ]
+                                   ]
+                        ]
+             ] ;
+   swrl:head [ rdf:type swrl:AtomList ;
+               rdf:first [ rdf:type swrl:ClassAtom ;
+                           swrl:classPredicate :КорректныйЗапрос ;
+                           swrl:argument1 :Q
+                         ] ;
+               rdf:rest rdf:nil
+             ]
+ ] .
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi
